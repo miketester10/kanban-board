@@ -6,12 +6,12 @@ let closeBtn = document.querySelector('#close');
 let addItemContainer = document.querySelector('.add-container');
 let addInput = document.querySelector('.add-input');
 let addItem = document.querySelector('.add-item');
-let task;
 let ul_todo = document.querySelector('#to-do-content > ul');
 let ul_doing = document.querySelector('#doing-content > ul');
 let ul_done = document.querySelector('#done-content > ul');
 let tasks = document.querySelectorAll('.drag-item');
 let columns = document.querySelectorAll('.drag-column');
+let task = null;
 let dragTask = null;
 let currentColumn = null;
 
