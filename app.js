@@ -67,7 +67,6 @@ async function inserisci_task_nel_db() {
         let data = await response.json();
         if (data.success == true) {
             console.log('Task inserito nel DB');
-            console.log(data.success);
             addToColumn();
         };
     }
@@ -109,7 +108,7 @@ async function addToColumn() {
     }
 
     if (tasks.length == 0) {
-        console.log('Nessuna task salvata nel DB');
+        console.log('Nessun task salvato nel DB');
         // console.log(tasks); 
     } else {
     tasks.forEach(task => {
