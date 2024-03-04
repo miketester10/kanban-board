@@ -6,15 +6,14 @@ let closeBtn = document.querySelector('#close');
 let addItemContainer = document.querySelector('.add-container');
 let addInput = document.querySelector('.add-input');
 let addItem = document.querySelector('.add-item');
-let ul_todo = document.querySelector('#to-do-content > ul');
+let ul_todo = document.querySelector('#todo-content > ul');
 let ul_doing = document.querySelector('#doing-content > ul');
 let ul_done = document.querySelector('#done-content > ul');
 let tasks = document.querySelectorAll('.drag-item');
 let columns = document.querySelectorAll('.drag-column');
 let task = null;
 let dragTask = null;
-let currentColumn = null;
-
+let dropColumn = null;
 
 addBtn.addEventListener('click', (event) => {
     event.preventDefault();
@@ -24,7 +23,7 @@ addBtn.addEventListener('click', (event) => {
     closeBtn.style.visibility = "visible";
 	saveItemBtn.style.display = "flex";
 	addItemContainer.style.display = "flex";   
-})
+});
 
 closeBtn.addEventListener('click', (event) => {
     event.preventDefault();
@@ -35,7 +34,7 @@ closeBtn.addEventListener('click', (event) => {
     saveItemBtn.style.display = "none";
     addItemContainer.style.display = "none";
     addItem.textContent = "";
-})
+});
 
 saveItemBtn.addEventListener('click', async (event) => {
     event.preventDefault();
@@ -62,7 +61,7 @@ async function inserisci_task_nel_db() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ colonna: 'to-do-column', descrizioneTask: task })
+            body: JSON.stringify({ colonna: 'todo-column', descrizioneTask: task })
         });
         let data = await response.json();
         if (data.success == true) {
@@ -83,11 +82,11 @@ async function aggiorna_tasks_nel_db() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: id, colonna: currentColumn })
+            body: JSON.stringify({ id: id, colonna: dropColumn })
         });
         let data = await response.json();
         if (data.success == true) {
-            console.log('Task aggiornato nel DB');
+            // console.log('Task aggiornato nel DB');
         };
     } catch (error) {
         console.error('Errore:', error);
@@ -98,7 +97,7 @@ async function addToColumn() {
     ul_todo.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
     ul_doing.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
     ul_done.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
-    // removeEvents();
+
     try {
         let response = await fetch('http://127.0.0.1:8080/recupera_tasks/')
         let data = await response.json();
@@ -118,7 +117,7 @@ async function addToColumn() {
         li_todo.setAttribute('data-id', task.id);
         li_todo.draggable = true;
         // Append
-        if (task.colonna == 'to-do-column') {
+        if (task.colonna == 'todo-column') {
             ul_todo.appendChild(li_todo);
         } else if (task.colonna == 'doing-column') {
             ul_doing.appendChild(li_todo);
@@ -131,25 +130,7 @@ async function addToColumn() {
 };
 addToColumn();
 
-// // rimuovi eventi drag&drop esistenti prima di aggiungere i nuovi
-// function removeEvents() {
-//     console.log(tasks);
-//     tasks.forEach(task => {
-//         task.removeEventListener('dragstart', dragStart);
-//         task.removeEventListener('dragend', dragEnd);
-//     });
-
-//     columns.forEach(column => {
-//         column.removeEventListener('dragover', dragOver);
-//         column.removeEventListener('dragenter', dragEnter);
-//         column.removeEventListener('dragleave', dragLeave);
-//         column.removeEventListener('drop', dragDrop);
-//     });
-//     console.log('eventi rimossi');
-// };
-
 function updateTasks() {
-
     tasks = document.querySelectorAll('.drag-item');
     tasks.forEach(task => {
         task.addEventListener('dragstart', dragStart);
@@ -167,15 +148,20 @@ function updateTasks() {
 function dragStart() {
     this.classList.add('dragging-color');
     setTimeout(() => this.classList.add('hide'), 10);
+
     dragTask = this;
+    let currentColumn = this.offsetParent.attributes[0].textContent.split(' ')[1];
+    this.setAttribute('data-current-column', currentColumn);
     // console.log('start');
 };
 
 function dragEnd() {
     this.classList.remove('dragging-color');
     this.classList.remove('hide');
+    task = null;
     dragTask = null;
-    currentColumn = null;
+    dropColumn = null;
+    // console.log('end');
 };
 
 function dragOver(e) {
@@ -183,28 +169,49 @@ function dragOver(e) {
     // console.log('over');   
 };
 
-function dragEnter() {
+function dragEnter() { 
     let classe = this.attributes[0].textContent.split(' ')[1];
     let content_corrente = document.querySelector(`.${classe} > div`);
     content_corrente.classList.add('over');
+
+    dropColumn = this.className.split(' ')[1];
+    let currentColumn = dragTask.getAttribute('data-current-column');
+    
+    if (dropColumn != currentColumn) {
+        let divs_content = document.querySelectorAll('#todo-content, #doing-content, #done-content');
+        let div_dropColumn = document.querySelector(`#${dropColumn.split('-')[0]}-content`);
+
+        divs_content.forEach(div => div.classList.remove('over'));
+        div_dropColumn.classList.add('over');
+    } else {
+        let divs_content = document.querySelectorAll('#todo-content, #doing-content, #done-content');
+        let div_currentColumn = document.querySelector(`#${currentColumn.split('-')[0]}-content`);
+        
+        divs_content.forEach(div => div.classList.remove('over'));
+        div_currentColumn.classList.add('over');
+    };
     // console.log('enter');
 };
 
 function dragLeave() {
-    // let classe = this.className.split(' ')[1];
-    // console.log(document.querySelector(`.${classe} > div`));
-    
+    // console.log('leave');   
 };
 
-async function dragDrop() {
-    // console.log('drop');
+function dragDrop() {
     let classe = this.attributes[0].textContent.split(' ')[1];
     let ul_corrente = document.querySelector(`.${classe} ul`);
     ul_corrente.appendChild(dragTask);
 
-    let divs_content = document.querySelectorAll('#to-do-content, #doing-content, #done-content');
+    let divs_content = document.querySelectorAll('#todo-content, #doing-content, #done-content');
     divs_content.forEach(div => div.classList.remove('over'));
-    currentColumn = this.className.split(' ')[1]
+
+    dropColumn = this.className.split(' ')[1];
+    let currentColumn = dragTask.getAttribute('data-current-column');
+    dragTask.removeAttribute('data-current-column');
     // console.log(currentColumn);
-    await aggiorna_tasks_nel_db();     
+    // console.log(dropColumn);
+    if (dropColumn != currentColumn) {
+        aggiorna_tasks_nel_db();
+    }
+    // console.log('drop');
 };

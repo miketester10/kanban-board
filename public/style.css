@@ -5,7 +5,7 @@ html {
 }
 
 :root {
-	--to-do: #a2622d;
+	--todo: #a2622d;
 	--doing: #1b6161;
 	--done: #248224;
 }
@@ -57,11 +57,11 @@ ul {
 	overflow-x: hidden;
 }
 
-.to-do-column .header,
-.to-do-column .solid,
-.to-do-column .solid:hover,
-.to-do-column .over {
-	background-color: var(--to-do);
+.todo-column .header,
+.todo-column .solid,
+.todo-column .solid:hover,
+.todo-column .over {
+	background-color: var(--todo);
 }
 
 .doing-column .header,
@@ -101,7 +101,7 @@ ul {
 .custom-scroll-todo::-webkit-scrollbar-thumb {
 	border-radius: 10px;
 	box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-	background-color: var(--to-do);
+	background-color: var(--todo);
 }
 
 /* Doing */
