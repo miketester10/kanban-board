@@ -19,11 +19,11 @@ function addTaskToDB(task) {
     });
 };
 
-function getTasksFromDB() {
-    const db = new sqlite.Database('kanban.db', (err) => { if (err) throw err; });
+function getTasksFromDB(id) {
+
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM tasks';
-        db.all(sql, [], (err, rows) => {
+        const sql = 'SELECT * FROM tasks WHERE id_user = ?';
+        db.all(sql, [id], (err, rows) => {
             if (!err) {
                 let tasks = rows
                 resolve(tasks); 
@@ -35,10 +35,10 @@ function getTasksFromDB() {
 };
 
 function updateTaskToDB(task) {
-    const db = new sqlite.Database('kanban.db', (err) => { if (err) throw err; });
+    
     return new Promise((resolve, reject) => {
-        const sql = 'UPDATE tasks SET colonna = ? WHERE id = ?';
-        db.run(sql, [task.colonna, task.id], function (err) {
+        const sql = 'UPDATE tasks SET colonna = ? WHERE id_task = ?';
+        db.run(sql, [task.colonna, task.id_task], function (err) {
             if (!err) {
                 resolve();
             } else {

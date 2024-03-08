@@ -14,6 +14,40 @@ let columns = document.querySelectorAll('.drag-column');
 let task = null;
 let dragTask = null;
 let dropColumn = null;
+const token = sessionStorage.getItem('token')
+
+if (token) {
+    addToColumn();
+} else {
+    handleLogin();
+};
+// Login
+async function handleLogin() {
+    const username = prompt('Inserisci la tua email:');
+    const password = prompt('Inserisci la tua password:');
+  
+    try {
+      const response = await fetch('http://127.0.0.1:8080/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+    //   console.log(response)
+      if (response.ok) {
+        const user = await response.json();
+        console.log(user)
+        addToColumn();
+        return user.nome
+      } else {
+        // Gestisci il caso di login fallito (mostra un messaggio di errore, ad esempio)
+        console.error('Credenziali non valide');
+      }
+    } catch (error) {
+      console.error('Errore durante il login:', error);
+    }
+};
 
 addBtn.addEventListener('click', (event) => {
     event.preventDefault();
@@ -82,7 +116,7 @@ async function aggiorna_tasks_nel_db() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: id, colonna: dropColumn })
+            body: JSON.stringify({ id_task: id, colonna: dropColumn })
         });
         let data = await response.json();
         if (data.success == true) {
@@ -114,7 +148,7 @@ async function addToColumn() {
         let li_todo = document.createElement('li');
         li_todo.textContent = task.descrizioneTask;
         li_todo.classList.add("drag-item");
-        li_todo.setAttribute('data-id', task.id);
+        li_todo.setAttribute('data-id', task.id_task);
         li_todo.draggable = true;
         // Append
         if (task.colonna == 'todo-column') {
@@ -128,7 +162,7 @@ async function addToColumn() {
         updateTasks();
     };
 };
-addToColumn();
+// addToColumn();
 
 function updateTasks() {
     tasks = document.querySelectorAll('.drag-item');
