@@ -320,3 +320,89 @@ ul {
 	visibility: hidden;
 }
 
+/* MODALE  */
+
+.modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-content {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #fff;
+	padding: 20px;
+	border-radius: 10px;
+  }
+  
+  .close {
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	font-size: 20px;
+	cursor: pointer;
+  }
+  
+  form {
+	display: flex;
+	flex-direction: column;
+  }
+  
+  label {
+	margin-bottom: 5px;
+  }
+  
+  input {
+	margin-bottom: 15px;
+	padding: 8px;
+	font-size: 16px;
+  }
+  
+  button {
+	padding: 10px;
+	background-color: #4CAF50;
+	color: #fff;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+  }
+  
+  button:hover {
+	background-color: #45a049;
+  }
+
+
+  .modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1000; /* Imposta un valore di z-index sufficientemente alto */
+  }
+
+/* Aggiungi questo stile per garantire che gli elementi della modale siano visibili */
+.modal-content h2,
+.modal-content label,
+.modal-content .close {
+  color: #333; /* Cambia questo colore in base alle tue esigenze */
+}
+
+h1.main-title,
+div.login {
+	display: inline-block;
+	vertical-align: middle; /* Opzionale: Allinea verticalmente gli elementi al centro */
+}
+
+body {
+	text-align: center;
+}

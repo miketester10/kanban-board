@@ -8,6 +8,7 @@
 		<link rel="stylesheet" href="style.css" />
 		<script defer src="app.js"></script>
 	</head>
+
 	<body>
 		<!-- Github Corner SVG (Optional ;) ) -->
 		<a
@@ -71,7 +72,28 @@
 		</style>
 		<!-- End of GitHub Corner -->
 
-		<h1 class="main-title">Mike's Kanban Board</h1>
+	<!-- HEADER -->
+		<h1 class="main-title">Kanban Board</h1>
+			<a id="loginText" href="#">Login</a>
+				<div id="modal" class="modal">
+					<div class="modal-content">
+						<span class="close" id="close">&times;</span>
+						<form id="loginForm">
+							<label for="email">Email:</label>
+							<input type="email" id="email" required>
+
+							<label for="password">Password:</label>
+							<input type="password" id="password" required>
+
+							<button type="submit">Login</button>
+						</form>
+					</div>
+				</div>
+
+			<a id="logoutText" href="#">Logout</a>
+
+	<!-- FINE HEADER -->
+
 		<div class="drag-container">
 			<ul class="drag-list">
 				<!-- To Be Done Column -->
@@ -87,7 +109,7 @@
 						></ul>
 					</div>
 					<!-- Add Button Group -->
-					<div class="add-btn-group">
+					<div class="add-btn-group no-visible">
 						<div class="add-btn" type="button">
 							<span class="plus-sign">+</span>
 							<span>Add Item</span>
@@ -137,5 +159,6 @@
 					</div>
 				</li>
 		</div>
+
 	</body>
 </html>

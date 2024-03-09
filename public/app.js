@@ -1,5 +1,6 @@
 'use strict';
 
+/*** Gestione pagina ***/
 let addBtn = document.querySelector('.add-btn:not(.solid)');
 let saveItemBtn = document.querySelector('.solid');
 let closeBtn = document.querySelector('#close');
@@ -11,43 +12,11 @@ let ul_doing = document.querySelector('#doing-content > ul');
 let ul_done = document.querySelector('#done-content > ul');
 let tasks = document.querySelectorAll('.drag-item');
 let columns = document.querySelectorAll('.drag-column');
+let title = document.querySelector('.main-title');
+let div_btn_group = document.querySelector('.add-btn-group');
 let task = null;
 let dragTask = null;
 let dropColumn = null;
-const token = sessionStorage.getItem('token')
-
-if (token) {
-    addToColumn();
-} else {
-    handleLogin();
-};
-// Login
-async function handleLogin() {
-    const username = prompt('Inserisci la tua email:');
-    const password = prompt('Inserisci la tua password:');
-  
-    try {
-      const response = await fetch('http://127.0.0.1:8080/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-    //   console.log(response)
-      if (response.ok) {
-        const user = await response.json();
-        console.log(user)
-        addToColumn();
-        return user.nome
-      } else {
-        // Gestisci il caso di login fallito (mostra un messaggio di errore, ad esempio)
-        console.error('Credenziali non valide');
-      }
-    } catch (error) {
-      console.error('Errore durante il login:', error);
-    }
-};
 
 addBtn.addEventListener('click', (event) => {
     event.preventDefault();
@@ -162,7 +131,6 @@ async function addToColumn() {
         updateTasks();
     };
 };
-// addToColumn();
 
 function updateTasks() {
     tasks = document.querySelectorAll('.drag-item');
@@ -249,3 +217,105 @@ function dragDrop() {
     }
     // console.log('drop');
 };
+
+/*** Gestione Login ***/
+const modal = document.getElementById('modal');
+const login_text = document.getElementById('loginText');
+const logout_text = document.querySelector('#logoutText'); 
+const closeButton = document.getElementById('close');
+const loginForm = document.getElementById('loginForm');  
+const input_email = document.getElementById('email');
+const input_password = document.getElementById('password');
+
+login_text.addEventListener('click', function () {
+    modal.style.display = 'block';
+});
+
+closeButton.addEventListener('click', function () {
+    modal.style.display = 'none';
+});
+
+window.addEventListener('click', function (event) {
+    if (event.target === modal) {
+    modal.style.display = 'none';
+    }
+});
+
+loginForm.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    try {
+        let username = input_email.value;
+        let password = input_password.value;
+        const response = await fetch('http://127.0.0.1:8080/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        });
+        // console.log(response)
+        if (response.ok) {
+            // console.log(user)
+            const user = await response.json();
+            const nome = user.nome[0].toUpperCase()+user.nome.slice(1);
+            
+            modal.style.display = 'none';
+
+            alert(`Login effettuato con successo. Benvenuto ${nome}!`);
+            controllo_autenticazione();
+        } else {
+            input_email.value = '';
+            input_password.value = '';
+
+            modal.style.display = 'none';
+
+            alert('Email o password errata!');
+        };
+    } catch (error) {
+        console.error('Errore durante il login:', error); 
+    }; 
+});
+
+/*** Gestione Logout ***/
+logout_text.addEventListener('click', async function () {
+    try {
+        const response = await fetch('http://127.0.0.1:8080/logout', {
+        method: 'POST',
+        });
+        if (response.ok) {
+            alert('Logout effettuato con successo!');
+            input_email.value = '';
+            input_password.value = '';
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Errore durante il logout:', error);
+    }
+})
+
+/*** Controllo la sessione attuale (quindi se sono autenticato, se sono ancora autenticato o se non lo sono proprio) ***/
+async function controllo_autenticazione() {
+    try {
+        const response = await fetch('http://127.0.0.1:8080/controllo_autenticazione')
+        if (response.ok) {
+            const user = await response.json();
+            const nome = user.nome[0].toUpperCase()+user.nome.slice(1);
+            const contenuto_titolo = `${nome}'s ${title.textContent}`; 
+            title.textContent = contenuto_titolo; 
+
+            login_text.classList.add('hide');  
+            logout_text.classList.remove('hide');
+            div_btn_group.classList.remove('no-visible');
+            addToColumn();
+            console.log('Sei autenticato');
+        } else {
+            logout_text.classList.add('hide');
+            console.log('Non sei autenticato');
+        }
+
+    } catch (error) {
+        console.error('Errore:', error);
+    }
+};
+controllo_autenticazione();
+  

@@ -50,16 +50,9 @@ const PORT = 8080;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-
-/*** Abilito sessioni in Express ***/
-app.use(session({
-    secret: 'Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID',
-    resave: false,
-    saveUninitialized: false
-}));
-
-/*** Verifico se l'utente è autenticato quando chiama una route ***/
+/*** Middleware per verificare se l'utente è autenticato o meno quando chiama una route ***/
 function isLoggedIn(req, res, next) {
+    // console.log(req.isAuthenticated());
     if (req.isAuthenticated()) {
         console.log(`L'utente ${req.user.username} è autenticato!`);
         // console.log(req.user);
@@ -67,6 +60,13 @@ function isLoggedIn(req, res, next) {
     };
     return res.status(401).json({ error: 'Utente non autenticato!' });
 };
+
+/*** Abilito sessioni in Express ***/
+app.use(session({
+    secret: 'Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID',
+    resave: false,
+    saveUninitialized: false
+}));
 
 /*** Abilito Passport per usare le sessioni ****/
 app.use(passport.initialize());
@@ -76,8 +76,9 @@ app.use(passport.session());
 // Route per inserire dati nel DB /inserisci_task
 app.post('/inserisci_task', isLoggedIn, async (req, res) => {
     try {
+        const id = req.user.id; // req.user contiene l'oggetto user creato con deserializeUser se il login andato a buon fine
         const task = req.body;
-        await task_dao.addTaskToDB(task);
+        await task_dao.addTaskToDB(id, task);
         res.json({ success: true });     
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -85,7 +86,7 @@ app.post('/inserisci_task', isLoggedIn, async (req, res) => {
 });
 
 // Route per recuperare dati dal DB /recupera_tasks
-app.get('/recupera_tasks/', isLoggedIn,async (req, res) => {
+app.get('/recupera_tasks/', isLoggedIn, async (req, res) => { 
     try {
         const id = req.user.id; // req.user contiene l'oggetto user creato con deserializeUser se il login andato a buon fine
         const tasks = await task_dao.getTasksFromDB(id);
@@ -97,7 +98,7 @@ app.get('/recupera_tasks/', isLoggedIn,async (req, res) => {
 });
 
 // Route per aggiornare dati nel DB /aggiorna_task
-app.post('/aggiorna_task', async (req, res) => {
+app.post('/aggiorna_task', isLoggedIn, async (req, res) => {
     try {
         const task = req.body;
         await task_dao.updateTaskToDB(task);
@@ -107,15 +108,38 @@ app.post('/aggiorna_task', async (req, res) => {
     }
 });
 
-// Route per l'autenticazione
+// Route per il login/autenticazione
 app.post('/login', passport.authenticate('local'), (req, res) => {
     // console.log(req);
     // console.log(req.user.username);
     res.json( req.user ); // dentro req.user ci sarà { id: row.id, username: row.email, name: row.nome } ovvero l'oggetto ricevuto dal db dopo aver fatto richiesta con LocalStrategy
 });
 
+// Route per il logout
+app.post('/logout', (req, res) => {
+    // Effettua il logout dell'utente
+    req.logout((err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Errore durante il logout' });
+      } else {
+        console.log('Logout effettuato con successo!');
+        // Chiudi la risposta HTTP
+        res.end();
+      }
+    });
+  });
+ 
+// Route per controllare se sono autenticato
+app.get('/controllo_autenticazione', isLoggedIn, (req, res) => {
+    // console.log(req.user.username);
+    res.json( req.user );
+})
+
+// Route per il logout
+
 /*** Avvio del server ***/
 app.listen(PORT, () => {
     console.log(`Il server è in ascolto sulla porta ${PORT}`);
-});
+}); 
   
