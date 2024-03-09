@@ -5,6 +5,20 @@ const bcrypt = require('bcrypt');
 
 const db = new sqlite.Database('kanban.db', (err) => { if (err) throw err; });
 
+function addUserToDB(user) {
+    user.password = bcrypt.hashSync(user.password, 10);
+    return new Promise((resolve, reject) => {
+        const sql = 'INSERT INTO users (email, password, nome, cognome) VALUES (?,?,?,?)';
+        db.run(sql, [user.email, user.password, user.nome, user.cognome], function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
 function getUserFromDBbyEmail(email, password) {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM users WHERE email = ?';
@@ -38,9 +52,10 @@ function getUserFromDBbyID(id) {
                 const user = { id: row.id, username: row.email, nome: row.nome, cognome: row.cognome };
                 resolve(user);
             }
-        })
-    })
-}
+        });
+    });
+};
 
+exports.addUserToDB = addUserToDB;
 exports.getUserFromDBbyEmail = getUserFromDBbyEmail;
 exports.getUserFromDBbyID = getUserFromDBbyID;

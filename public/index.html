@@ -73,24 +73,46 @@
 		<!-- End of GitHub Corner -->
 
 	<!-- HEADER -->
+		<!-- Title -->
 		<h1 class="main-title">Kanban Board</h1>
-			<a id="loginText" href="#">Login</a>
-				<div id="modal" class="modal">
-					<div class="modal-content">
-						<span class="close" id="close">&times;</span>
-						<form id="loginForm">
-							<label for="email">Email:</label>
-							<input type="email" id="email" required>
+		<!-- Iscrizione -->
+		<a id="iscrizioneText" href="#">Iscrizione</a>
+			<div id="modalIscrizione" class="modal">
+				<div class="modal-content">
+					<form id="formIscrizione">
+						<label for="nomeIscrizione">Nome:</label>
+						<input type="text" id="nomeIscrizione" required>
 
-							<label for="password">Password:</label>
-							<input type="password" id="password" required>
+						<label for="cognomeIscrizione">Cognome:</label>
+						<input type="text" id="cognomeIscrizione" required>
 
-							<button type="submit">Login</button>
-						</form>
-					</div>
+						<label for="emailIscrizione">Email:</label>
+						<input type="email" id="emailIscrizione" required>
+
+						<label for="passwordIscrizione">Password:</label>
+						<input type="password" id="passwordIscrizione" required>
+
+						<button type="submit">Iscriviti</button>
+					</form>
 				</div>
+			</div>
+		<!-- Login -->
+		<a id="loginText" href="#">Login</a>
+			<div id="modalLogin" class="modal">
+				<div class="modal-content">
+					<form id="formLogin">
+						<label for="emailLogin">Email:</label>
+						<input type="email" id="emailLogin" required>
 
-			<a id="logoutText" href="#">Logout</a>
+						<label for="passwordLogin">Password:</label>
+						<input type="password" id="passwordLogin" required>
+
+						<button type="submit">Login</button>
+					</form>
+				</div>
+			</div>
+		<!-- Logout -->
+		<a id="logoutText" href="#">Logout</a>
 
 	<!-- FINE HEADER -->
 

@@ -218,34 +218,87 @@ function dragDrop() {
     // console.log('drop');
 };
 
-/*** Gestione Login ***/
-const modal = document.getElementById('modal');
-const login_text = document.getElementById('loginText');
-const logout_text = document.querySelector('#logoutText'); 
-const closeButton = document.getElementById('close');
-const loginForm = document.getElementById('loginForm');  
-const input_email = document.getElementById('email');
-const input_password = document.getElementById('password');
+/*** Gestione Iscrizione ***/
+const modal_iscrizione = document.getElementById('modalIscrizione');
+const iscrizione_text = document.getElementById('iscrizioneText');
+const iscrizione_form = document.getElementById('formIscrizione');  
+const input_nome_iscrizione = document.getElementById('nomeIscrizione');
+const input_cognome_iscrizione = document.getElementById('cognomeIscrizione');
+const input_email_iscrizione = document.getElementById('emailIscrizione');
+const input_password_iscrizione = document.getElementById('passwordIscrizione');
 
-login_text.addEventListener('click', function () {
-    modal.style.display = 'block';
+iscrizione_text.addEventListener('click', function () {
+    modal_iscrizione.style.display = 'block';
 });
 
-closeButton.addEventListener('click', function () {
-    modal.style.display = 'none';
-});
-
-window.addEventListener('click', function (event) {
-    if (event.target === modal) {
-    modal.style.display = 'none';
+window.addEventListener('click', function (event) { // serve per chiudere la finestra modale quando clicco in qualsiasi punto dello schermo al di fuori della finsetra modale
+    if (event.target === modal_iscrizione) {
+        // console.log(event.target);
+        modal_iscrizione.style.display = 'none';
+        input_nome_iscrizione.value = '';
+        input_cognome_iscrizione.value = '';
+        input_email_iscrizione.value = '';
+        input_password_iscrizione.value = '';
     }
 });
 
-loginForm.addEventListener('submit', async function (event) {
+iscrizione_form.addEventListener('submit', async function (event) {
     event.preventDefault();
     try {
-        let username = input_email.value;
-        let password = input_password.value;
+        let nome = input_nome_iscrizione.value;
+        let cognome = input_cognome_iscrizione.value;
+        let email = input_email_iscrizione.value;
+        let password = input_password_iscrizione.value;
+        const response = await fetch('http://127.0.0.1:8080/iscrizione', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ nome: nome, cognome: cognome, email: email, password: password }),
+        });
+        // console.log(response)
+        if (response.ok) {
+            modal_iscrizione.style.display = 'none';
+            input_nome_iscrizione.value = '';
+            input_cognome_iscrizione.value = '';
+            input_email_iscrizione.value = '';
+            input_password_iscrizione.value = '';
+            alert('Iscrizione effettuata con successo!');
+        } else {
+            // gestisco errori tipi: email già registrata, ecc..
+            const errore = await response.json();
+            alert(errore.error);
+        };
+    } catch (error) {
+        console.error('Errore durante l\'iscrizione:', error);
+    };
+});
+
+/*** Gestione Login ***/
+const modal_login = document.getElementById('modalLogin');
+const login_text = document.getElementById('loginText');
+const login_form = document.getElementById('formLogin');  
+const input_email_login = document.getElementById('emailLogin');
+const input_password_login = document.getElementById('passwordLogin');
+
+login_text.addEventListener('click', function () {
+    modal_login.style.display = 'block';
+});
+
+window.addEventListener('click', function (event) { // serve per chiudere la finestra modale quando clicco in qualsiasi punto dello schermo al di fuori della finsetra modale
+    if (event.target === modal_login) {
+        // console.log(event.target);
+        modal_login.style.display = 'none';
+        input_email_login.value = '';
+        input_password_login.value = '';
+    }
+});
+
+login_form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    try {
+        let username = input_email_login.value;
+        let password = input_password_login.value;
         const response = await fetch('http://127.0.0.1:8080/login', {
         method: 'POST',
         headers: {
@@ -257,17 +310,17 @@ loginForm.addEventListener('submit', async function (event) {
         if (response.ok) {
             // console.log(user)
             const user = await response.json();
-            const nome = user.nome[0].toUpperCase()+user.nome.slice(1);
+            const nome = user.nome[0].toUpperCase()+user.nome.slice(1).toLowerCase();
             
-            modal.style.display = 'none';
+            modal_login.style.display = 'none';
 
             alert(`Login effettuato con successo. Benvenuto ${nome}!`);
             controllo_autenticazione();
         } else {
-            input_email.value = '';
-            input_password.value = '';
+            input_email_login.value = '';
+            input_password_login.value = '';
 
-            modal.style.display = 'none';
+            modal_login.style.display = 'none';
 
             alert('Email o password errata!');
         };
@@ -277,6 +330,8 @@ loginForm.addEventListener('submit', async function (event) {
 });
 
 /*** Gestione Logout ***/
+const logout_text = document.querySelector('#logoutText');
+
 logout_text.addEventListener('click', async function () {
     try {
         const response = await fetch('http://127.0.0.1:8080/logout', {
@@ -284,8 +339,8 @@ logout_text.addEventListener('click', async function () {
         });
         if (response.ok) {
             alert('Logout effettuato con successo!');
-            input_email.value = '';
-            input_password.value = '';
+            input_email_login.value = '';
+            input_password_login.value = '';
             location.reload();
         }
     } catch (error) {
@@ -299,11 +354,12 @@ async function controllo_autenticazione() {
         const response = await fetch('http://127.0.0.1:8080/controllo_autenticazione')
         if (response.ok) {
             const user = await response.json();
-            const nome = user.nome[0].toUpperCase()+user.nome.slice(1);
+            const nome = user.nome[0].toUpperCase()+user.nome.slice(1).toLowerCase();
             const contenuto_titolo = `${nome}'s ${title.textContent}`; 
             title.textContent = contenuto_titolo; 
 
-            login_text.classList.add('hide');  
+            login_text.classList.add('hide');
+            iscrizione_text.classList.add('hide');  
             logout_text.classList.remove('hide');
             div_btn_group.classList.remove('no-visible');
             addToColumn();

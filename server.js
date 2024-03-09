@@ -82,7 +82,7 @@ app.post('/inserisci_task', isLoggedIn, async (req, res) => {
         res.json({ success: true });     
     } catch (error) {
         res.status(500).json({ error: error.message });
-    }
+    };
 });
 
 // Route per recuperare dati dal DB /recupera_tasks
@@ -94,7 +94,7 @@ app.get('/recupera_tasks/', isLoggedIn, async (req, res) => {
         res.json({ tasks });    
     } catch (error) {
         res.status(500).json({ error: error.message });
-    }
+    };
 });
 
 // Route per aggiornare dati nel DB /aggiorna_task
@@ -105,7 +105,23 @@ app.post('/aggiorna_task', isLoggedIn, async (req, res) => {
         res.json({ success: true }); 
     } catch (error) {
         res.status(500).json({ error: error.message });
-    }
+    };
+});
+
+// Route per la registrazione utente
+app.post('/iscrizione', async (req, res) => {
+    try {
+        const user = req.body;
+        console.log(user);
+        await utenti_dao.addUserToDB(user);
+        res.json({ success: true });
+    } catch (error) {
+        if (error.message.includes('UNIQUE constraint failed')) {
+            res.status(500).json({ error: 'Email già registrata!' });
+        } else {
+            res.status(500).json({ error: error.message });
+        };
+    };  
 });
 
 // Route per il login/autenticazione
@@ -124,11 +140,10 @@ app.post('/logout', (req, res) => {
         return res.status(500).json({ error: 'Errore durante il logout' });
       } else {
         console.log('Logout effettuato con successo!');
-        // Chiudi la risposta HTTP
         res.end();
-      }
+      };
     });
-  });
+});
  
 // Route per controllare se sono autenticato
 app.get('/controllo_autenticazione', isLoggedIn, (req, res) => {
