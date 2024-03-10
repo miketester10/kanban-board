@@ -151,8 +151,6 @@ app.get('/controllo_autenticazione', isLoggedIn, (req, res) => {
     res.json( req.user );
 })
 
-// Route per il logout
-
 /*** Avvio del server ***/
 app.listen(PORT, () => {
     console.log(`Il server è in ascolto sulla porta ${PORT}`);

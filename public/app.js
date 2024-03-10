@@ -1,5 +1,7 @@
 'use strict';
 
+const BASE_URL = 'http://localhost:8080';
+
 /*** Gestione pagina ***/
 let addBtn = document.querySelector('.add-btn:not(.solid)');
 let saveItemBtn = document.querySelector('.solid');
@@ -59,7 +61,7 @@ saveItemBtn.addEventListener('click', async (event) => {
 
 async function inserisci_task_nel_db() {
     try {
-        let response = await fetch('http://127.0.0.1:8080/inserisci_task/', {
+        let response = await fetch(`${BASE_URL}/inserisci_task/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,7 +82,7 @@ async function inserisci_task_nel_db() {
 async function aggiorna_tasks_nel_db() {
     try {
         let id = parseInt(dragTask.getAttribute('data-id'));
-        let response = await fetch('http://127.0.0.1:8080/aggiorna_task/', {
+        let response = await fetch(`${BASE_URL}/aggiorna_task/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -102,7 +104,7 @@ async function addToColumn() {
     ul_done.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
 
     try {
-        let response = await fetch('http://127.0.0.1:8080/recupera_tasks/')
+        let response = await fetch(`${BASE_URL}/recupera_tasks/`)
         let data = await response.json();
         tasks = data.tasks;
     } catch (error) {
@@ -249,7 +251,7 @@ iscrizione_form.addEventListener('submit', async function (event) {
         let cognome = input_cognome_iscrizione.value;
         let email = input_email_iscrizione.value;
         let password = input_password_iscrizione.value;
-        const response = await fetch('http://127.0.0.1:8080/iscrizione', {
+        const response = await fetch(`${BASE_URL}/iscrizione`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -299,7 +301,7 @@ login_form.addEventListener('submit', async function (event) {
     try {
         let username = input_email_login.value;
         let password = input_password_login.value;
-        const response = await fetch('http://127.0.0.1:8080/login', {
+        const response = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -334,7 +336,7 @@ const logout_text = document.querySelector('#logoutText');
 
 logout_text.addEventListener('click', async function () {
     try {
-        const response = await fetch('http://127.0.0.1:8080/logout', {
+        const response = await fetch(`${BASE_URL}/logout`, {
         method: 'POST',
         });
         if (response.ok) {
@@ -351,7 +353,7 @@ logout_text.addEventListener('click', async function () {
 /*** Controllo la sessione attuale (quindi se sono autenticato, se sono ancora autenticato o se non lo sono proprio) ***/
 async function controllo_autenticazione() {
     try {
-        const response = await fetch('http://127.0.0.1:8080/controllo_autenticazione')
+        const response = await fetch(`${BASE_URL}/controllo_autenticazione`)
         if (response.ok) {
             const user = await response.json();
             const nome = user.nome[0].toUpperCase()+user.nome.slice(1).toLowerCase();
