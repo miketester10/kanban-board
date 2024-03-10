@@ -50,7 +50,7 @@ const PORT = 8080;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-/*** Middleware per verificare se l'utente è autenticato o meno quando chiama una route ***/
+/*** Middleware per verificare se l'utente è autenticato o meno quando chiama una route (serve anche a proteggere la route, in quanto se l'utente non è autenticato e prova ad accedere alla route ottiene un errore: status code "401" ed il messaggio error: Utente non autenticato!) ***/
 function isLoggedIn(req, res, next) {
     // console.log(req.isAuthenticated());
     if (req.isAuthenticated()) {
@@ -132,7 +132,7 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 });
 
 // Route per il logout
-app.post('/logout', (req, res) => {
+app.post('/logout', isLoggedIn, (req, res) => {
     // Effettua il logout dell'utente
     req.logout((err) => {
       if (err) {
