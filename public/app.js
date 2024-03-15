@@ -336,9 +336,7 @@ const logout_text = document.querySelector('#logoutText');
 
 logout_text.addEventListener('click', async function () {
     try {
-        const response = await fetch(`${BASE_URL}/logout`, {
-        method: 'POST',
-        });
+        const response = await fetch(`${BASE_URL}/logout`)
         if (response.ok) {
             alert('Logout effettuato con successo!');
             input_email_login.value = '';

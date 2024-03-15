@@ -132,7 +132,7 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 });
 
 // Route per il logout
-app.post('/logout', isLoggedIn, (req, res) => {
+app.get('/logout', isLoggedIn, (req, res) => {
     // Effettua il logout dell'utente
     req.logout((err) => {
       if (err) {
