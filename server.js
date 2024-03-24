@@ -49,7 +49,7 @@ const PORT = 8080;
 /*** Set up Middleware ***/
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public')); // configuro Express per servire i file statici dalla cartella 'public'.
 /*** Middleware per verificare se l'utente è autenticato o meno quando chiama una route (serve anche a proteggere la route, in quanto se l'utente non è autenticato e prova ad accedere alla route ottiene un errore: status code "401" ed il messaggio error: Utente non autenticato!) ***/
 function isLoggedIn(req, res, next) {
     // console.log(req.isAuthenticated());
@@ -117,7 +117,7 @@ app.post('/iscrizione', async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         if (error.message.includes('UNIQUE constraint failed')) {
-            res.status(500).json({ error: 'Email già registrata!' });
+            res.status(409).json({ error: 'Email già registrata!' });
         } else {
             res.status(500).json({ error: error.message });
         };
