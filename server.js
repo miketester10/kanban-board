@@ -53,7 +53,7 @@ app.use(express.static('public')); // configuro Express per servire i file stati
 /*** Middleware per verificare se l'utente è autenticato o meno quando chiama una route (serve anche a proteggere la route, in quanto se l'utente non è autenticato e prova ad accedere alla route ottiene un errore: status code "401" ed il messaggio error: Utente non autenticato!) ***/
 function isLoggedIn(req, res, next) {
     // console.log(req.isAuthenticated());
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated()) { // controllo se sono autenticato (dopo esser stato deserializzato con passport.deserializeUser), prima di procedere con il codice presente nella route chiamante, altrimenti viene restituito un 401 Unauthorized
         console.log(`L'utente ${req.user.username} è autenticato!`);
         // console.log(req.user);
         return next();
@@ -88,10 +88,11 @@ app.post('/inserisci_task', isLoggedIn, async (req, res) => {
 // Route per recuperare dati dal DB /recupera_tasks
 app.get('/recupera_tasks/', isLoggedIn, async (req, res) => { 
     try {
-        const id = req.user.id; // req.user contiene l'oggetto user creato con deserializeUser se il login andato a buon fine
+        const user = req.user; // req.user contiene l'oggetto user creato con deserializeUser se il login è andato a buon fine
+        const id = user.id; 
         const tasks = await task_dao.getTasksFromDB(id);
         console.log(tasks);
-        res.json({ tasks });    
+        res.json({ tasks, user });    
     } catch (error) {
         res.status(500).json({ error: error.message });
     };
@@ -144,12 +145,6 @@ app.get('/logout', isLoggedIn, (req, res) => {
       };
     });
 });
- 
-// Route per controllare se sono autenticato
-app.get('/controllo_autenticazione', isLoggedIn, (req, res) => {
-    // console.log(req.user.username);
-    res.json( req.user );
-})
 
 /*** Avvio del server ***/
 app.listen(PORT, () => {

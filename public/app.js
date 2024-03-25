@@ -102,11 +102,25 @@ async function addToColumn() {
     ul_todo.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
     ul_doing.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
     ul_done.innerHTML = ""; // ogni volta pulisco/inizalizzo subito l'elenco prima di crearlo/ri-crearlo
+    logout_text.classList.add('hide');
 
+    let tasks = null;
+    let user = null;
     try {
         let response = await fetch(`${BASE_URL}/recupera_tasks/`)
         let data = await response.json();
         tasks = data.tasks;
+        user = data.user;
+        if (response.ok) { // se sono autenticato
+            let nome = user.nome[0].toUpperCase()+user.nome.slice(1).toLowerCase();
+            let contenuto_titolo = `${nome}'s Kanban Board`;
+            title.textContent = contenuto_titolo; 
+
+            login_text.classList.add('hide');
+            iscrizione_text.classList.add('hide');  
+            logout_text.classList.remove('hide');
+            div_btn_group.classList.remove('no-visible');
+        };
     } catch (error) {
         console.error('Errore:', error);
     }
@@ -308,16 +322,15 @@ login_form.addEventListener('submit', async function (event) {
         },
         body: JSON.stringify({ username, password }),
         });
-        // console.log(response)
+
         if (response.ok) {
-            // console.log(user)
             const user = await response.json();
             const nome = user.nome[0].toUpperCase()+user.nome.slice(1).toLowerCase();
-            
+            alert(`Login effettuato con successo. Benvenuto ${nome}!`);
+
             modal_login.style.display = 'none';
 
-            alert(`Login effettuato con successo. Benvenuto ${nome}!`);
-            controllo_autenticazione();
+            addToColumn();
         } else {
             input_email_login.value = '';
             input_password_login.value = '';
@@ -346,32 +359,6 @@ logout_text.addEventListener('click', async function () {
     } catch (error) {
         console.error('Errore durante il logout:', error);
     }
-})
+});
 
-/*** Controllo la sessione attuale (quindi se sono autenticato, se sono ancora autenticato o se non lo sono proprio) ***/
-async function controllo_autenticazione() {
-    try {
-        const response = await fetch(`${BASE_URL}/controllo_autenticazione`)
-        if (response.ok) {
-            const user = await response.json();
-            const nome = user.nome[0].toUpperCase()+user.nome.slice(1).toLowerCase();
-            const contenuto_titolo = `${nome}'s ${title.textContent}`; 
-            title.textContent = contenuto_titolo; 
-
-            login_text.classList.add('hide');
-            iscrizione_text.classList.add('hide');  
-            logout_text.classList.remove('hide');
-            div_btn_group.classList.remove('no-visible');
-            addToColumn();
-            console.log('Sei autenticato');
-        } else {
-            logout_text.classList.add('hide');
-            console.log('Non sei autenticato');
-        }
-
-    } catch (error) {
-        console.error('Errore:', error);
-    }
-};
-controllo_autenticazione();
-  
+addToColumn();
