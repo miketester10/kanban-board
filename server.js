@@ -5,6 +5,7 @@ const cors = require('cors');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy; // strategia username(email)+password
 const session = require('express-session');
+const FileStore = require('session-file-store')(session); 
 const task_dao = require('./kanban_dao');
 const utenti_dao = require('./utenti_dao');
 
@@ -63,6 +64,7 @@ function isLoggedIn(req, res, next) {
 
 /*** Abilito sessioni in Express ***/
 app.use(session({
+    store: new FileStore(), // per salvare le sessioni in locale nella cartella sessions anzichè in memoria, così se spengo e riavvio il server, la sessione resta attiva e l'utente non deve rifare il login sulla pagina quando riavvio il server.
     secret: 'Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID',
     resave: false,
     saveUninitialized: false
