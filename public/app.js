@@ -61,7 +61,7 @@ saveItemBtn.addEventListener('click', async (event) => {
 
 async function inserisci_task_nel_db() {
     try {
-        let response = await fetch(`${BASE_URL}/inserisci_task/`, {
+        let response = await fetch(`${BASE_URL}/api/v1/tasks/task`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,8 +82,8 @@ async function inserisci_task_nel_db() {
 async function aggiorna_tasks_nel_db() {
     try {
         let id = parseInt(dragTask.getAttribute('data-id'));
-        let response = await fetch(`${BASE_URL}/aggiorna_task/`, {
-            method: 'POST',
+        let response = await fetch(`${BASE_URL}/api/v1/tasks/task`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -107,7 +107,7 @@ async function addToColumn() {
     let tasks = null;
     let user = null;
     try {
-        let response = await fetch(`${BASE_URL}/recupera_tasks/`)
+        let response = await fetch(`${BASE_URL}/api/v1/tasks`)
         let data = await response.json();
         tasks = data.tasks;
         user = data.user;

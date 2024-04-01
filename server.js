@@ -75,20 +75,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 /*** Definisco tutte le Route ***/
-// Route per inserire dati nel DB /inserisci_task
-app.post('/inserisci_task', isLoggedIn, async (req, res) => {
-    try {
-        const id = req.user.id; // req.user contiene l'oggetto user creato con deserializeUser se il login andato a buon fine
-        const task = req.body;
-        await task_dao.addTaskToDB(id, task);
-        res.json({ success: true });     
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    };
-});
-
-// Route per recuperare dati dal DB /recupera_tasks
-app.get('/recupera_tasks/', isLoggedIn, async (req, res) => { 
+// Route per recuperare tutte le tasks dell'utente dal DB [METHOD = GET]
+app.get('/api/v1/tasks', isLoggedIn, async (req, res) => { 
     try {
         const user = req.user; // req.user contiene l'oggetto user creato con deserializeUser se il login è andato a buon fine
         const id = user.id; 
@@ -100,8 +88,20 @@ app.get('/recupera_tasks/', isLoggedIn, async (req, res) => {
     };
 });
 
-// Route per aggiornare dati nel DB /aggiorna_task
-app.post('/aggiorna_task', isLoggedIn, async (req, res) => {
+// Route per inserire la singola task nel DB [METHOD = POST]
+app.post('/api/v1/tasks/task', isLoggedIn, async (req, res) => {
+    try {
+        const id = req.user.id; // req.user contiene l'oggetto user creato con deserializeUser se il login andato a buon fine
+        const task = req.body;
+        await task_dao.addTaskToDB(id, task);
+        res.json({ success: true });     
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    };
+});
+
+// Route per aggiornare la singola task nel DB [METHOD = PUT]
+app.put('/api/v1/tasks/task', isLoggedIn, async (req, res) => {
     try {
         const task = req.body;
         await task_dao.updateTaskToDB(task);
