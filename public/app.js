@@ -55,13 +55,13 @@ saveItemBtn.addEventListener('click', async (event) => {
         return;
     }
     addItem.textContent = "";
-    await inserisci_task_nel_db();
+    await addTaskToDB();
 
 });
 
-async function inserisci_task_nel_db() {
+async function addTaskToDB() {
     try {
-        let response = await fetch(`${BASE_URL}/api/v1/tasks/task`, {
+        let response = await fetch(`${BASE_URL}/api/v1/tasks/task`, { // aggiungo la singola task dell'utente autenticato nel DB
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -79,10 +79,10 @@ async function inserisci_task_nel_db() {
     };
 };
 
-async function aggiorna_tasks_nel_db() {
+async function updateTaskToDB() {
     try {
         let id = parseInt(dragTask.getAttribute('data-id'));
-        let response = await fetch(`${BASE_URL}/api/v1/tasks/task`, {
+        let response = await fetch(`${BASE_URL}/api/v1/tasks/task`, { // aggiorno la singola task dell'utente autenticato nel DB
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -107,7 +107,7 @@ async function addToColumn() {
     let tasks = null;
     let user = null;
     try {
-        let response = await fetch(`${BASE_URL}/api/v1/tasks`)
+        let response = await fetch(`${BASE_URL}/api/v1/tasks`) // recupero tutte le tasks dell'utente autenticato dal DB
         let data = await response.json();
         tasks = data.tasks;
         user = data.user;
@@ -144,11 +144,11 @@ async function addToColumn() {
             ul_done.appendChild(li_todo);
         };     
     });
-        updateTasks();
+        handleDragAndDrop();
     };
 };
 
-function updateTasks() {
+function handleDragAndDrop() {
     tasks = document.querySelectorAll('.drag-item');
     tasks.forEach(task => {
         task.addEventListener('dragstart', dragStart);
@@ -229,7 +229,7 @@ function dragDrop() {
     // console.log(currentColumn);
     // console.log(dropColumn);
     if (dropColumn != currentColumn) {
-        aggiorna_tasks_nel_db();
+        updateTaskToDB();
     }
     // console.log('drop');
 };
