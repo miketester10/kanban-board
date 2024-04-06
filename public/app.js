@@ -349,7 +349,7 @@ const logout_text = document.querySelector('#logoutText');
 
 logout_text.addEventListener('click', async function () {
     try {
-        const response = await fetch(`${BASE_URL}/logout`)
+        const response = await fetch(`${BASE_URL}/logout`, { method: 'DELETE' });
         if (response.ok) {
             alert('Logout effettuato con successo!');
             input_email_login.value = '';

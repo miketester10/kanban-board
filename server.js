@@ -67,7 +67,8 @@ app.use(session({
     store: new FileStore(), // per salvare le sessioni in locale nella cartella sessions anzichè in memoria, così se spengo e riavvio il server, la sessione resta attiva e l'utente non deve rifare il login sulla pagina quando riavvio il server.
     secret: 'Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    // cookie: { secure: true } // per abilitare l'utilizzo di cookie con connessioni HTTPS
 }));
 
 /*** Abilito Passport per usare le sessioni ****/
@@ -111,7 +112,7 @@ app.put('/api/v1/tasks/task', isLoggedIn, async (req, res) => {
     };
 });
 
-// Route per la registrazione utente
+// Route per la registrazione utente [METHOD = POST]
 app.post('/iscrizione', async (req, res) => {
     try {
         const user = req.body;
@@ -127,15 +128,15 @@ app.post('/iscrizione', async (req, res) => {
     };  
 });
 
-// Route per il login/autenticazione
+// Route per il login/autenticazione [METHOD = POST]
 app.post('/login', passport.authenticate('local'), (req, res) => {
     // console.log(req);
     // console.log(req.user.username);
     res.json( req.user ); // dentro req.user ci sarà { id: row.id, username: row.email, name: row.nome } ovvero l'oggetto ricevuto dal db dopo aver fatto richiesta con LocalStrategy
 });
 
-// Route per il logout
-app.get('/logout', isLoggedIn, (req, res) => {
+// Route per il logout [METHOD = DELETE]
+app.delete('/logout', isLoggedIn, (req, res) => {
     // Effettua il logout dell'utente
     req.logout((err) => {
       if (err) {
