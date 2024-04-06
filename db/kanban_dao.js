@@ -2,7 +2,7 @@
 
 const sqlite = require('sqlite3');
 
-const db = new sqlite.Database('kanban.db', (err) => { if (err) throw err; });
+const db = new sqlite.Database('./db/kanban.db', (err) => { if (err) throw err; });
 
 function addTaskToDB(id, task) {
     

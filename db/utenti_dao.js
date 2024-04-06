@@ -3,7 +3,7 @@
 const sqlite = require('sqlite3');
 const bcrypt = require('bcrypt');
 
-const db = new sqlite.Database('kanban.db', (err) => { if (err) throw err; });
+const db = new sqlite.Database('./db/kanban.db', (err) => { if (err) throw err; });
 
 function addUserToDB(user) {
     user.password = bcrypt.hashSync(user.password, 10);

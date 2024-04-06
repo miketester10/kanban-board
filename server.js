@@ -1,13 +1,18 @@
 'use strict';
 
 const express = require('express');
-const cors = require('cors');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy; // strategia username(email)+password
 const session = require('express-session');
-const FileStore = require('session-file-store')(session); 
-const task_dao = require('./kanban_dao');
-const utenti_dao = require('./utenti_dao');
+// const FileStore = require('session-file-store')(session);
+const task_dao = require('./db/kanban_dao');
+const utenti_dao = require('./db/utenti_dao');
+require('dotenv').config();
+
+/*** Uso better-sqlite3 per salvare le sessioni nel DB, anzichè 'session-file-store' ***/
+const sqlite = require('better-sqlite3');
+const SqliteStore = require('better-sqlite3-session-store')(session)
+const sessionsDB = new sqlite('./sessions/sessions.db');
 
 /*** Set up Passport ***/
 passport.use(new LocalStrategy(
@@ -48,7 +53,6 @@ const app = express();
 const PORT = 8080;
 
 /*** Set up Middleware ***/
-app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); // configuro Express per servire i file statici dalla cartella 'public'.
 /*** Middleware per verificare se l'utente è autenticato o meno quando chiama una route (serve anche a proteggere la route, in quanto se l'utente non è autenticato e prova ad accedere alla route ottiene un errore: status code "401" ed il messaggio error: Utente non autenticato!) ***/
@@ -62,10 +66,21 @@ function isLoggedIn(req, res, next) {
     return res.status(401).json({ error: 'Utente non autenticato!' });
 };
 
-/*** Abilito sessioni in Express ***/
+/*** Abilito sessioni in Express (Opzione usando 'session-file-store') ***/
+// app.use(session({
+//     store: new FileStore(), // per salvare le sessioni in locale nella cartella sessions anzichè in memoria, così se spengo e riavvio il server, la sessione resta attiva e l'utente non deve rifare il login sulla pagina quando riavvio il server.
+//     secret: process.env.SECRET // Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID'. La metto in una variabile d'ambiente.
+//     resave: false,
+//     saveUninitialized: false,
+//     // cookie: { secure: true } // per abilitare l'utilizzo di cookie con connessioni HTTPS
+// }));
+
+/*** Abilito sessioni in Express (Opzione usando 'better-sqlite3') ***/
 app.use(session({
-    store: new FileStore(), // per salvare le sessioni in locale nella cartella sessions anzichè in memoria, così se spengo e riavvio il server, la sessione resta attiva e l'utente non deve rifare il login sulla pagina quando riavvio il server.
-    secret: 'Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID',
+    store: new SqliteStore({ // per salvare le sessioni nel DB nella cartella sessions anzichè in memoria, così se spengo e riavvio il server, la sessione resta attiva e l'utente non deve rifare il login sulla pagina quando riavvio il server.
+        client: sessionsDB,
+    }),
+    secret: process.env.SECRET, // Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID'. La metto in una variabile d'ambiente.
     resave: false,
     saveUninitialized: false,
     // cookie: { secure: true } // per abilitare l'utilizzo di cookie con connessioni HTTPS
