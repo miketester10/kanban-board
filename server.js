@@ -147,7 +147,7 @@ app.post('/iscrizione', async (req, res) => {
 app.post('/login', passport.authenticate('local'), (req, res) => {
     // console.log(req);
     // console.log(req.user.username);
-    res.json( req.user ); // dentro req.user ci sarà { id: row.id, username: row.email, name: row.nome } ovvero l'oggetto ricevuto dal db dopo aver fatto richiesta con LocalStrategy
+    res.json( req.user ); // dentro req.user ci sarà { id: row.id, username: row.email, name: row.nome } ovvero l'oggetto ricevuto dal DB dopo aver fatto richiesta con LocalStrategy
 });
 
 // Route per il logout [METHOD = DELETE]
@@ -159,7 +159,7 @@ app.delete('/logout', isLoggedIn, (req, res) => {
         return res.status(500).json({ error: 'Errore durante il logout' });
       } else {
         console.log('Logout effettuato con successo!');
-        res.end();
+        req.session.destroy((err) => err ? console.error(err) : res.end()); // Elimina la sessione corrente dal DB
       };
     });
 });
@@ -167,5 +167,4 @@ app.delete('/logout', isLoggedIn, (req, res) => {
 /*** Avvio del server ***/
 app.listen(PORT, () => {
     console.log(`Il server è in ascolto sulla porta ${PORT}`);
-}); 
-  
+});  
