@@ -72,7 +72,7 @@ function isLoggedIn(req, res, next) {
 //     secret: process.env.SECRET // Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID'. La metto in una variabile d'ambiente.
 //     resave: false,
 //     saveUninitialized: false,
-//     // cookie: { secure: true } // per abilitare l'utilizzo di cookie con connessioni HTTPS
+//     cookie: { sameSite: 'Lax' } // imposto sameSite a 'Lax' per limitare attacchi CSRF. Inoltre aggiungere { secure: true } per abilitare l'utilizzo dei cookie con connessioni HTTPS.
 // }));
 
 /*** Abilito sessioni in Express (Opzione usando 'better-sqlite3') ***/
@@ -83,7 +83,7 @@ app.use(session({
     secret: process.env.SECRET, // Frase segreta (posso scrivere qualsiasi cosa) da non condividere con nessuno. Serve a firmare il cookie Session ID'. La metto in una variabile d'ambiente.
     resave: false,
     saveUninitialized: false,
-    // cookie: { secure: true } // per abilitare l'utilizzo di cookie con connessioni HTTPS
+    cookie: { sameSite: 'Lax' } // imposto sameSite a 'Lax' per limitare attacchi CSRF. Inoltre aggiungere { secure: true } per abilitare l'utilizzo dei cookie con connessioni HTTPS.
 }));
 
 /*** Abilito Passport per usare le sessioni ****/
