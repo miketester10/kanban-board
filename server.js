@@ -2,17 +2,14 @@
 
 const fs = require('fs');
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const { verifyToken, signToken, deleteToken } = require('./middleware/user-auth');
 const task_dao = require('./db/kanban_dao');
 const utenti_dao = require('./db/utenti_dao');
 
 /*** Inizializzo Express ***/
 const app = express();
 const PORT = 8080;
-
-/*** JWT options ***/
-const jwtOptions = { expiresIn: '1h', algorithm: 'RS256' };
 
 /*** Set up Middleware ***/
 app.use(express.json());
@@ -21,31 +18,22 @@ app.use(cookieParser());
 
 /*** Definisco tutte le Route ***/
 // Route per recuperare tutte le tasks dell'utente dal DB [METHOD = GET]
-app.get('/api/v1/tasks', async (req, res) => { 
+app.get('/api/v1/tasks', verifyToken, async (req, res) => { 
     try {
-        const token = req.cookies.token;
-        const pub_key = fs.readFileSync('./key/rsa.public', 'utf8');
-        if (!token) return res.status(401).json({ error: 'Utente non autenticato!' });
-        const payload = jwt.verify(token, pub_key, jwtOptions);
-        console.log(payload);
-        const id = payload.id;
-        const user = payload; 
+        const id = req.user.id; // req.user contiene il payload del token, poichè lo abbiamo assegnato all'interno della middleware verifyToken.
+        const user = req.user; 
         const tasks = await task_dao.getTasksFromDB(id);
         console.log(tasks);
-        res.json({ tasks, user });    
+        res.json({ tasks, user });
     } catch (error) {
-        if (error.message.includes('jwt expired') || error.message.includes('invalid signature')) {
-            res.status(401).json({ error: 'Utente non autenticato! Token scaduto o non valido.' });
-        } else {
-            res.status(500).json({ error: error.message });
-        };
+        res.status(500).json({ error: error.message });
     };
 });
 
 // Route per inserire la singola task nel DB [METHOD = POST]
-app.post('/api/v1/tasks/task', async (req, res) => {
+app.post('/api/v1/tasks/task', verifyToken, async (req, res) => {
     try {
-        const id = req.user.id; // req.user contiene l'oggetto user creato con deserializeUser se il login andato a buon fine
+        const id = req.user.id; 
         const task = req.body;
         await task_dao.addTaskToDB(id, task);
         res.json({ success: true });     
@@ -55,7 +43,7 @@ app.post('/api/v1/tasks/task', async (req, res) => {
 });
 
 // Route per aggiornare la singola task nel DB [METHOD = PUT]
-app.put('/api/v1/tasks/task', async (req, res) => {
+app.put('/api/v1/tasks/task', verifyToken, async (req, res) => {
     try {
         const task = req.body;
         await task_dao.updateTaskToDB(task);
@@ -82,40 +70,13 @@ app.post('/iscrizione', async (req, res) => {
 });
 
 // Route per il login/autenticazione [METHOD = POST]
-app.post('/login', async (req, res) => {
-    try {
-        const email = req.body.username;
-        const password = req.body.password;
-        const user = await utenti_dao.getUserFromDBbyEmail(email, password);
-        console.log(user);
-        if (!user) return res.status(401).json({ error: 'Email o password errata!' });
-        const payload = { id: user.id, nome: user.nome };
-        const cookieOptions = { 
-            expire: new Date(Date.now() + 3600000), 
-            httpOnly: true, 
-            secure: false, // Impostare { secure: true } per abilitare l'utilizzo dei cookie con connessioni HTTPS.
-            sameSite: 'Lax' // Imposto sameSite a 'Lax' per limitare attacchi CSRF.
-        };
-        const prv_key = fs.readFileSync('./key/rsa.private');
-        const token = jwt.sign(payload, prv_key, jwtOptions);
-        res.cookie('token', token, cookieOptions).json(user); 
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    };
+app.post('/login', signToken, (req, res) => {
+    // Effetta il login dell'utente e crea il cookie di autenticazione, medante il middleware signToken.
 });
 
 // Route per il logout [METHOD = DELETE]
-app.delete('/logout', (req, res) => {
-    // Effettua il logout dell'utente
-    req.logout((err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Errore durante il logout' });
-      } else {
-        console.log('Logout effettuato con successo!');
-        req.session.destroy((err) => err ? console.error(err) : res.end()); // Elimina la sessione corrente dal DB
-      };
-    });
+app.delete('/logout', deleteToken, (req, res) => {
+    // Effettua il logout dell'utente e rimuovi il cookie di autenticazione, mediante il middleware deleteToken.
 });
 
 /*** Avvio del server ***/
