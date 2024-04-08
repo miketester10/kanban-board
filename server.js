@@ -6,15 +6,13 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const task_dao = require('./db/kanban_dao');
 const utenti_dao = require('./db/utenti_dao');
-require('dotenv').config();
-
 
 /*** Inizializzo Express ***/
 const app = express();
 const PORT = 8080;
 
 /*** JWT options ***/
-const option = { expiresIn: '1h', algorithm: 'RS256' };
+const jwtOptions = { expiresIn: '1h', algorithm: 'RS256' };
 
 /*** Set up Middleware ***/
 app.use(express.json());
@@ -28,7 +26,7 @@ app.get('/api/v1/tasks', async (req, res) => {
         const token = req.cookies.token;
         const pub_key = fs.readFileSync('./key/rsa.public', 'utf8');
         if (!token) return res.status(401).json({ error: 'Utente non autenticato!' });
-        const payload = jwt.verify(token, pub_key, option);
+        const payload = jwt.verify(token, pub_key, jwtOptions);
         console.log(payload);
         const id = payload.id;
         const user = payload; 
@@ -92,14 +90,15 @@ app.post('/login', async (req, res) => {
         console.log(user);
         if (!user) return res.status(401).json({ error: 'Email o password errata!' });
         const payload = { id: user.id, nome: user.nome };
-        const cookieOption = { 
+        const cookieOptions = { 
             expire: new Date(Date.now() + 3600000), 
             httpOnly: true, 
-            secure: false // Aggiungere { secure: true } per abilitare l'utilizzo dei cookie con connessioni HTTPS.
+            secure: false, // Impostare { secure: true } per abilitare l'utilizzo dei cookie con connessioni HTTPS.
+            sameSite: 'Lax' // Imposto sameSite a 'Lax' per limitare attacchi CSRF.
         };
         const prv_key = fs.readFileSync('./key/rsa.private');
-        const token = jwt.sign(payload, prv_key, option);
-        res.cookie('token', token, cookieOption).json(user); 
+        const token = jwt.sign(payload, prv_key, jwtOptions);
+        res.cookie('token', token, cookieOptions).json(user); 
     } catch (error) {
         res.status(500).json({ error: error.message });
     };
