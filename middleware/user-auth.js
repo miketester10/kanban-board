@@ -38,14 +38,22 @@ async function signToken(req, res, next) {
       };
       const prv_key = fs.readFileSync('./key/rsa.private');
       const token = jwt.sign(payload, prv_key, jwtOptions);
-      res.cookie('token', token, cookieOptions).json(user); 
+      res.cookie('token', token, cookieOptions).json(user);
+      next(); 
   } catch (error) {
       res.status(500).json({ error: error.message });
   };
 };
 
 function deleteToken(req, res, next) {
-  // TO DO
+      const cookieOptions = { 
+        expire: new Date(0), // Imposto il tempo di scadenza del cookie a '0' (1° gennaio 1970) quindi nel passato, per rimuovere il cookie poichè scade immediatamente.
+        httpOnly: true, 
+        secure: false, // Impostare { secure: true } per abilitare l'utilizzo dei cookie con connessioni HTTPS.
+        sameSite: 'Lax' // Imposto sameSite a 'Lax' per limitare attacchi CSRF.
+      };
+      res.cookie('token', '', cookieOptions).send();
+      next();
 };
 
 module.exports = { 

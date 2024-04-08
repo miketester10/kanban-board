@@ -71,12 +71,12 @@ app.post('/iscrizione', async (req, res) => {
 
 // Route per il login/autenticazione [METHOD = POST]
 app.post('/login', signToken, (req, res) => {
-    // Effetta il login dell'utente e crea il cookie di autenticazione, medante il middleware signToken.
+    console.log('Login effettuato!');
 });
 
 // Route per il logout [METHOD = DELETE]
 app.delete('/logout', deleteToken, (req, res) => {
-    // Effettua il logout dell'utente e rimuovi il cookie di autenticazione, mediante il middleware deleteToken.
+    console.log('Logout effettuato!');
 });
 
 /*** Avvio del server ***/
